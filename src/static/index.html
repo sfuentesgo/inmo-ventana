@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inmo-Ventana | Estrategias de Navegación Arquitectónica</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.45; }
+    header { background: #0f172a; color: #fff; padding: 16px 24px; }
+    .container { max-width: 1140px; margin: 0 auto; }
+    .header-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .badge-green { color: #34d399; font-size: 0.85rem; font-weight: 500; }
+    .subtitle { color: #94a3b8; font-size: 0.78rem; margin-top: 2px; }
+    .btn { border: none; border-radius: 6px; padding: 8px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .btn-dark { background: #334155; color: #fff; }
+    .btn-dark:hover { background: #475569; }
+    .btn-emerald { background: #059669; color: #fff; }
+    .btn-emerald:hover { background: #047857; }
+    .btn-light { background: #e2e8f0; color: #1e293b; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    main { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    .card { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 18px; }
+    .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    label { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
+    select { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 7px; font-size: 0.88rem; background: #fff; }
+    .top-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    @media (max-width: 820px) { .top-grid { grid-template-columns: 1fr; } }
+    .principal-box { display: flex; gap: 18px; align-items: center; }
+    .principal-box img { width: 220px; height: 160px; object-fit: cover; border-radius: 8px; background: #e2e8f0; }
+    .tag { display: inline-block; background: #d1fae5; color: #065f46; font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 5px; }
+    .price { font-size: 1.5rem; font-weight: 800; color: #047857; margin: 6px 0; }
+    .specs { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: #475569; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
+    .telemetry { background: #0f172a; color: #fff; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
+    .metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .metric-box { background: #1e293b; padding: 10px 12px; border-radius: 8px; }
+    .metric-val { font-size: 1.35rem; font-weight: 800; color: #34d399; }
+    .metric-val.amber { color: #fbbf24; }
+    .origin-box { background: #1e293b; padding: 8px 12px; border-radius: 6px; font-size: 0.78rem; color: #7dd3fc; }
+    .plana-box { background: #fffbeb; border: 2px dashed #f59e0b; border-radius: 10px; padding: 28px; text-align: center; }
+    .plana-badge { display: inline-block; background: #fde68a; color: #78350f; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; margin-bottom: 10px; }
+    .rec-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+    .rec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .rec-card { border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #f8fafc; cursor: pointer; transition: transform 0.12s; }
+    .rec-card:hover { border-color: #059669; transform: translateY(-2px); }
+    .rec-card img { width: 100%; height: 125px; object-fit: cover; background: #e2e8f0; }
+    .rec-body { padding: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-flex">
+      <div>
+        <h1 style="font-size: 1.2rem;">Inmo-Ventana <span class="badge-green">| Venta de Vivienda Bogotá & La Sabana</span></h1>
+        <p class="subtitle">Comparativa Arquitectónica: Navegación Plana vs. Navegación Guiada (Strategy · Iterator · Cache)</p>
+      </div>
+      <button onclick="limpiarCache()" class="btn btn-dark">Reiniciar Caché</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card controls-grid">
+      <div>
+        <label>1. Inmueble en vista actual:</label>
+        <select id="selectInmueble" onchange="reiniciarYCargar()"></select>
+      </div>
+      <div>
+        <label>2. Arquitectura de Navegación:</label>
+        <select id="selectModo" onchange="reiniciarYCargar()" style="border: 2px solid #059669; font-weight: 600;">
+          <option value="plana">ANTES: Navegación Plana (Sin recomendaciones)</option>
+          <option value="optimizada" selected>DESPUÉS: Navegación Optimizada (Podría interesarte)</option>
+        </select>
+      </div>
+      <div id="contenedorEstrategia">
+        <label>3. Algoritmo (Patrón Strategy):</label>
+        <select id="selectEstrategia" onchange="reiniciarYCargar()">
+          <option value="precio">Cercanía de Precio (±15%)</option>
+          <option value="zona">Misma Zona y Área Similar</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="top-grid">
+      <div id="tarjetaPrincipal" class="card principal-box"></div>
+
+      <div class="telemetry">
+        <div>
+          <span style="font-size: 0.72rem; color: #34d399; font-weight: 700; text-transform: uppercase;">Métricas de Evaluación (Unidad 3)</span>
+          <h2 id="telModo" style="font-size: 1rem; margin-top: 4px;">-</h2>
+          <p id="telEstrategia" style="font-size: 0.78rem; color: #94a3b8;">-</p>
+        </div>
+        <div class="metrics-row">
+          <div class="metric-box">
+            <span style="font-size: 0.72rem; color: #94a3b8; display: block;">Tiempo Respuesta</span>
+            <span id="telTiempo" class="metric-val">0 ms</span>
+          </div>
+          <div class="metric-box">
+            <span style="font-size: 0.72rem; color: #94a3b8; display: block;">Nodos Evaluados</span>
+            <span id="telNodos" class="metric-val amber">0</span>
+          </div>
+        </div>
+        <div class="origin-box">
+          <span style="color: #94a3b8;">Origen:</span> <strong id="telOrigen">-</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA MODO PLANO -->
+    <section id="vistaPlana" class="plana-box" style="display: none;">
+      <span class="plana-badge">PROBLEMA DETECTADO: NAVEGACIÓN PLANA (CALLEJÓN SIN SALIDA)</span>
+      <h3 style="font-size: 1.1rem; margin-bottom: 8px;">Este inmueble no tiene rutas de continuación sugeridas</h3>
+      <p style="font-size: 0.88rem; color: #475569; max-width: 680px; margin: 0 auto 16px auto;">
+        En la arquitectura actual, si esta propiedad no se ajusta al comprador, el flujo se interrumpe: el usuario debe regresar al catálogo general de 10.000 registros y ejecutar una nueva búsqueda secuencial <strong>O(n)</strong> sin caché.
+      </p>
+      <button onclick="volverAlCatalogoAleatorio()" class="btn btn-dark">
+        ← Volver al listado general y explorar otro inmueble manualmente
+      </button>
+    </section>
+
+    <!-- VISTA MODO OPTIMIZADO -->
+    <section id="vistaOptimizada" class="card" style="display: block;">
+      <div class="rec-header">
+        <div>
+          <span class="tag" style="margin-bottom: 4px;">SOLUCIÓN ARQUITECTÓNICA ACTIVA</span>
+          <h3 style="font-size: 1.1rem;">Podría interesarte <span id="contadorResultados" style="font-size: 0.8rem; font-weight: 400; color: #64748b;"></span></h3>
+          <p style="font-size: 0.78rem; color: #64748b;">Haz clic en cualquier tarjeta para navegar continuamente · Paginación bajo demanda mediante <strong>Patrón Iterator</strong></p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="btnAnterior" onclick="cambiarPagina(-1)" class="btn btn-light">← Anterior</button>
+          <span id="textoPagina" style="font-size: 0.8rem; font-weight: 700;">Página 1</span>
+          <button id="btnSiguiente" onclick="cambiarPagina(1)" class="btn btn-emerald">Siguiente lote (Iterator) →</button>
+        </div>
+      </div>
+      <div id="gridRecomendaciones" class="rec-grid"></div>
+    </section>
+  </main>
+
+  <script>
+    let paginaActual = 1;
+    const formatoCOP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+
+    async function inicializar() {
+      const res = await fetch('/api/inmuebles?limite=10');
+      const inmuebles = await res.json();
+      const select = document.getElementById('selectInmueble');
+      select.innerHTML = inmuebles.map(i =>
+        `<option value="${i.id}">#${i.id} - ${i.titulo} (${formatoCOP.format(i.precio)})</option>`
+      ).join('');
+      cargarNavegacion();
+    }
+
+    function reiniciarYCargar() {
+      paginaActual = 1;
+      cargarNavegacion();
+    }
+
+    function cambiarPagina(delta) {
+      paginaActual = Math.max(1, paginaActual + delta);
+      cargarNavegacion();
+    }
+
+    function volverAlCatalogoAleatorio() {
+      const select = document.getElementById('selectInmueble');
+      select.selectedIndex = (select.selectedIndex + 1) % select.options.length;
+      reiniciarYCargar();
+    }
+
+    async function cargarNavegacion() {
+      const id = document.getElementById('selectInmueble').value;
+      const modo = document.getElementById('selectModo').value;
+      const estrategia = document.getElementById('selectEstrategia').value;
+
+      const esOptimizada = modo === 'optimizada';
+      document.getElementById('contenedorEstrategia').style.opacity = esOptimizada ? '1' : '0.35';
+      document.getElementById('selectEstrategia').disabled = !esOptimizada;
+      document.getElementById('vistaOptimizada').style.display = esOptimizada ? 'block' : 'none';
+      document.getElementById('vistaPlana').style.display = esOptimizada ? 'none' : 'block';
+
+      const url = esOptimizada
+        ? `/api/navegacion/optimizada/${id}?estrategia=${estrategia}&pagina=${paginaActual}`
+        : `/api/navegacion/plana/${id}?pagina=${paginaActual}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const base = data.inmueble_base;
+
+      document.getElementById('tarjetaPrincipal').innerHTML = `
+        <img src="${base.imagen_url}" alt="${base.titulo}" />
+        <div>
+          <span class="tag">EN VENTA · Estrato ${base.estrato}</span>
+          <h2 style="font-size: 1.15rem; margin-top: 6px;">${base.titulo}</h2>
+          <p class="price">${formatoCOP.format(base.precio)}</p>
+          <div class="specs">
+            <span><strong>Área:</strong> ${base.area_m2} m²</span>
+            <span><strong>Habitaciones:</strong> ${base.habitaciones}</span>
+            <span><strong>Baños:</strong> ${base.banos}</span>
+            <span><strong>Zona:</strong> ${base.zona}</span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('telModo').textContent = data.modo;
+      document.getElementById('telEstrategia').textContent = data.estrategia_aplicada;
+      document.getElementById('telTiempo').textContent = `${data.tiempo_ms} ms`;
+      document.getElementById('telNodos').textContent = data.nodos_evaluados.toLocaleString('es-CO');
+      document.getElementById('telOrigen').textContent = data.origen_datos;
+
+      if (esOptimizada) {
+        document.getElementById('contadorResultados').textContent = `(${data.total_encontrados} alternativas encontradas)`;
+        document.getElementById('textoPagina').textContent = `Página ${data.pagina_actual}`;
+        document.getElementById('btnAnterior').disabled = data.pagina_actual <= 1;
+        document.getElementById('btnSiguiente').disabled = !data.tiene_siguiente;
+
+        document.getElementById('gridRecomendaciones').innerHTML = data.recomendaciones.map(rec => `
+          <div onclick="seleccionarInmueble(${rec.id})" class="rec-card">
+            <img src="${rec.imagen_url}" alt="${rec.titulo}" />
+            <div class="rec-body">
+              <span style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">${rec.zona} · Estrato ${rec.estrato}</span>
+              <h4 style="font-size: 0.9rem; margin: 3px 0;">${rec.titulo}</h4>
+              <p style="color: #047857; font-weight: 800; font-size: 0.95rem;">${formatoCOP.format(rec.precio)}</p>
+              <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">${rec.area_m2} m² · ${rec.habitaciones} hab · ${rec.banos} baños</p>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function seleccionarInmueble(id) {
+      const select = document.getElementById('selectInmueble');
+      if (![...select.options].some(o => o.value == id)) {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.text = `#${id} - Inmueble explorado desde recomendación`;
+        select.add(opt);
+      }
+      select.value = id;
+      paginaActual = 1;
+      cargarNavegacion();
+    }
+
+    async function limpiarCache() {
+      await fetch('/api/cache/limpiar', { method: 'POST' });
+      cargarNavegacion();
+    }
+
+    inicializar();
+  </script>
+</body>
+</html>
